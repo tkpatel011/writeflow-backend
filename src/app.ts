@@ -24,7 +24,7 @@ app.options('*', cors(corsOptions));
 app.use(express.json());
 
 // Root endpoint
-app.get('/', (req, res) => {
+app.get('/', (req: express.Request, res:express.Response) => {
   res.json({
     success: true,
     message: "WriteFlow Backend Running"
@@ -46,7 +46,7 @@ app.get('/api/health', healthHandler);
 app.use('/api', routes);
 
 // Add JSON 404 middleware to prevent Express default HTML 404 responses
-app.use((req, res) => {
+app.use((req: express.Request, res:express.Response) => {
   res.status(404).json({
     success: false,
     error: "Route Not Found"
