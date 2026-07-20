@@ -1,9 +1,27 @@
 import { GoogleGenAI } from '@google/genai';
 import { ENV } from '../config/env';
 import { logger } from '../utils/logger';
-const ai = new GoogleGenAI({ apiKey: ENV.GEMINI_API_KEY });
-export const generateCompletion = async (systemPrompt: string, userPrompt: string, model = 'gemini-3.5-flash'): Promise<string> => {
+import { generateGroqCompletion } from './groqService';
+
+let geminiAiClient: GoogleGenAI | null = null;
+
+const getGeminiClient = (): GoogleGenAI => {
+  if (!geminiAiClient) {
+    if (!ENV.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is not configured');
+    }
+    geminiAiClient = new GoogleGenAI({ apiKey: ENV.GEMINI_API_KEY });
+  }
+  return geminiAiClient;
+};
+
+export const generateGeminiCompletion = async (
+  systemPrompt: string,
+  userPrompt: string,
+  model = 'gemini-2.5-flash'
+): Promise<string> => {
   try {
+    const ai = getGeminiClient();
     const response = await ai.models.generateContent({
       model: model,
       contents: userPrompt,
@@ -42,6 +60,26 @@ export const generateCompletion = async (systemPrompt: string, userPrompt: strin
     }
     const err: any = new Error(errorMessage);
     err.statusCode = statusCode;
+    throw err;
+  }
+};
+
+/**
+ * Universal completion generator.
+ * Prefers Groq if GROQ_API_KEY is present; falls back to Gemini if GEMINI_API_KEY is set.
+ */
+export const generateCompletion = async (
+  systemPrompt: string,
+  userPrompt: string,
+  model?: string
+): Promise<string> => {
+  if (ENV.GROQ_API_KEY) {
+    return await generateGroqCompletion(systemPrompt, userPrompt, model);
+  } else if (ENV.GEMINI_API_KEY) {
+    return await generateGeminiCompletion(systemPrompt, userPrompt, model || 'gemini-2.5-flash');
+  } else {
+    const err: any = new Error('No valid API Key found. Please set GROQ_API_KEY in your environment variables.');
+    err.statusCode = 500;
     throw err;
   }
 };
