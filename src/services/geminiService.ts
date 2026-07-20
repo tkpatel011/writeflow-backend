@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { ENV } from '../config/env';
 import { logger } from '../utils/logger';
 const ai = new GoogleGenAI({ apiKey: ENV.GEMINI_API_KEY });
-export const generateCompletion = async (systemPrompt: string, userPrompt: string, model = 'gemini-2.0-flash'): Promise<string> => {
+export const generateCompletion = async (systemPrompt: string, userPrompt: string, model = 'gemini-3.5-flash'): Promise<string> => {
   try {
     const response = await ai.models.generateContent({
       model: model,
