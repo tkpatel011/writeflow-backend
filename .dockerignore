@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+.env.aws
+.git
+.gitignore
+.vscode
+npm-debug.log
+test*.ts
+test*.js
+listModels.ts
